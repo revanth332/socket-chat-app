@@ -3,10 +3,13 @@ import express from 'express';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { configDotenv } from "dotenv";
+configDotenv();
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
+const PORT = process.env.port || 3000;
 
 const rooms = []
 var users = {}
@@ -58,6 +61,7 @@ io.on('connection', (socket) => {
   });
 
 console.log(import.meta.url )
-server.listen(3000, () => {
-  console.log('server running at http://localhost:3000');
+server.listen(PORT, () => {
+  console.log(`server running at http://localhost:${PORT}`);
 });
+console.log(process.env.FT)
