@@ -7,7 +7,8 @@
     <style>
       body {
         margin: 0;
-        padding: 0px 20px;
+        padding: 0px;
+        box-sizing: border-box;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           Helvetica, Arial, sans-serif;
         background-color: #f5f5f5;
@@ -18,17 +19,11 @@
         /* box-shadow: inset 5px 5px 5px #B0C4DE, inset 5px 5px 5px black,inset -5px -5px 5px #B0C4DE, inset -5px -5px 5px black; */
       }
 
-      /* #form { background: rgba(4, 66, 116, 0.295); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
-      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; } */
-
       #messages {
         list-style-type: none;
         margin: 0;
         padding: 0;
       }
-      /* #messages > li { padding: 0.5rem 1rem; }
-      #messages > li:nth-child(odd) { background: #efefef; } */
-
       .mymsg {
         width: 200px;
         background: #833ab4;
@@ -40,47 +35,49 @@
       .message {
         margin-bottom: 10px;
         padding: 10px;
-        border-radius: 20px;
+        border-radius: 10px;
         color: white;
+        position: relative;
       }
 
-      .sent {
+      .msg-right {
         background: #833ab4;
         margin-left: auto;
         width: fit-content;
         min-width: 200px;
-        position: relative;
         z-index: 2;
       }
       .sent::after {
         position: absolute;
         content: "";
-        height: 20px;
+        height: 10px;
         width: 30px;
         right: -5px;
-        bottom: -2px;
+        top: 0;
         background-color: #833ab4;
         border-radius: 0px 0px 25px 25px;
-        transform: rotate(90deg);
         z-index: -1;
       }
 
-      .received {
+      .msg-left {
         background: rgb(2, 0, 36);
         text-align: left;
         margin-right: auto;
         width: fit-content;
         min-width: 200px;
+        z-index: 2;
       }
 
       .received::after {
         position: absolute;
         content: "";
         height: 10px;
-        width: 50px;
-        left: 26px;
+        width: 30px;
+        left: -5px;
+        top: 0;
         background-color: rgb(2, 0, 36);
-        border-radius: 50%;
+        border-radius: 0 0 25px 25px;
+        z-index: -1;
       }
 
       .timestamp {
@@ -89,18 +86,14 @@
         margin-top: 5px;
         text-align: end;
       }
-      #form {
-        position: absolute;
-        bottom: 0;
-        width: 95%;
-      }
-      .input-container {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-      }
 
-      .input-field {
+      /* .input-container {
+          display: flex;
+          align-items: center;
+          margin-bottom: 10px;
+        } */
+
+      /* .input-field {
         flex: 1;
         padding: 10px;
         border: 1px solid #ccc;
@@ -108,8 +101,8 @@
         margin-bottom: 10px;
         margin-right: 20px;
         margin-left: 20px;
-        /* width: 90vw; */
-      }
+      } */
+
       li {
         list-style: none;
       }
@@ -130,7 +123,6 @@
         border: 1px solid #ddd;
         border-radius: 10px;
         overflow-y: scroll;
-        height: 100vh; /* Adjust the height as needed */
       }
       .user {
         font-size: 13px;
@@ -153,14 +145,14 @@
         margin-top: 13%;
       }
 
-      .form {
+      /* .form {
         display: flex;
         flex-direction: column;
         padding: 20px;
         border: 1px solid #ccc;
         border-radius: 5px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      }
+      } */
 
       .form-input {
         padding: 10px;
@@ -192,14 +184,13 @@
         margin-bottom: 10px;
       }
       .chatbox,
-      #users {
-        /* Hide scrollbar for Firefox */
+      #users,
+      #users-mobile {
         -ms-overflow-style: none;
         scrollbar-width: none;
         padding: 20px;
       }
 
-      /* Hide scrollbar for Chrome, Safari and Opera */
       .chatbox::-webkit-scrollbar,
       .chat-container::-webkit-scrollbar,
       #users::-webkit-scrollbar {
@@ -208,53 +199,110 @@
     </style>
   </head>
   <body class="body">
-    <!-- <div id="mask" style="height: 100vh;width:100vw;background-color: black; position: absolute;z-index: 8;opacity: .4;">
-    </div>
-    <dialog id="dialog" style="z-index: 30;;" open>
+    <div
+      id="mask"
+      style="
+        height: 100vh;
+        width: 100vw;
+        background-color: black;
+        position: absolute;
+        z-index: 8;
+        opacity: 0.4;
+      "
+    ></div>
+    <dialog id="dialog" style="z-index:30; max-width: 400px; padding: 20px; border-radius: 10px; border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" open>
       <div class="form-container">
-        <form id="choose" class="form">
-          <select id="type" name="type">
+        <form id="choose" class="form bg-white p-6 rounded-lg">
+          <select id="type" name="type" class="w-full mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="Create">Create a Room</option>
             <option value="Enter">Enter into Room</option>
           </select>
-          <input type="text" id="room" name="room" class="form-input" placeholder="Enter room no">
-          <input type="text" id="user" name="user" class="form-input" placeholder="Enter username">
-          <button type="submit" class="form-button">Submit</button>
-          <p id="error" style="text-align:center"></p>
+          <input
+            type="text"
+            id="room"
+            name="room"
+            class="w-full mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter room no"
+          />
+          <input
+            type="text"
+            id="user"
+            name="user"
+            class="w-full mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter username"
+          />
+          <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">Submit</button>
+          <p id="error" class="mt-4 text-red-500 text-center"></p>
         </form>
       </div>
-    </dialog> -->
+    </dialog>
 
-    <div class="grid grid-cols-4 gap-3">
-      <div
-        id="users"
-        class="h-screen bg-slate-200 rounded-2xl p-5 overflow-scroll"
-      >
-        <h2>Participants</h2>
+    <div class="h-screen">
+      <div class="nav-user-name bg-black text-white p-3 h-[7%]">
+        <img
+          class="inline-block mr-2 lg:hidden cursive"
+          src="./assets/burger-menu.png"
+          width="30px"
+          alt=""
+          onClick="changeIcon(this)"
+        />
+        WeChat
       </div>
-      <div id="container" class="chat-container col-span-3 w-full">
+
+      <div
+        class="grid grid-cols-4 grid-rows-10 border border-black h-[93%] gap-3 p-2"
+      >
         <div
-          id="chatbox"
-          class="chatbox"
-          style="height: 89vh; overflow: scroll; overflow-x: hidden"
+          id="users"
+          class="bg-slate-200 rounded-2xl p-5 overflow-scroll hidden lg:block row-span-10"
         >
-          <ul id="messages"></ul>
+          <h2>Participants</h2>
         </div>
 
-        <form id="form" action="">
-          <div class="input-container">
-            <input
-              id="input"
-              type="text"
-              autocomplete="off"
-              class="input-field"
-              placeholder="Type your message..."
-            />
-            <button class="send-button">Send</button>
+        <!-- for smaller devices -->
+         <div class="sidebar-mask transition ease-in w-screen h-screen bg-black opacity-50 absolute top-12 z-10 left-0 hidden">
+
+         </div>
+        <div
+          id="users-mobile"
+          class="h-screen bg-slate-200 p-5 overflow-scroll absolute top-12 left-0 z-10 w-[250px] -translate-x-[260px] transition lg:hidden"
+        >
+          <h2>Participants</h2>
+        </div>
+
+        <div
+          id="container"
+          class="chat-container lg:col-span-3 col-span-4 row-span-10 w-full grid grid-rows-12"
+        >
+          <div
+            id="chatbox"
+            class="chatbox row-span-11"
+            style="overflow: scroll; overflow-x: hidden"
+          >
+            <ul id="messages">
+
+            </ul>
           </div>
-          <!-- <input id="input" autocomplete="off" /><button>Send</button> -->
-        </form>
+
+          <form
+            id="form"
+            class="flex row-span-2 justify-center items-center"
+          >
+            <div class="input-container flex w-full">
+              <input
+                id="input"
+                type="text"
+                autocomplete="off"
+                class="input-field flex-grow px-3 py-2 mr-2"
+                placeholder="Type your message..."
+              />
+              <button class="send-button flex-shrink-0 px-4">Send</button>
+            </div>
+            <!-- <input id="input" autocomplete="off" /><button>Send</button> -->
+          </form>
+        </div>
       </div>
+      <!-- for large devices -->
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -270,23 +318,85 @@
       const input = document.getElementById("input");
       const chooseForm = document.getElementById("choose");
 
+      function changeIcon(icon) {
+        let prevIconPath = icon.getAttribute("src");
+        let newIconPath = prevIconPath;
+        if (prevIconPath.includes("cross")) {
+          newIconPath = "./assets/burger-menu.png";
+          document
+            .getElementById("users-mobile")
+            .classList.replace("translate-x-0", "-translate-x-full");
+          document.querySelector(".sidebar-mask").classList.add("hidden");
+        } else {
+          newIconPath = "./assets/cross-button.png";
+          document
+            .getElementById("users-mobile")
+            .classList.add("-translate-x-full", "translate-x-0");
+            document.querySelector(".sidebar-mask").classList.remove("hidden");
+        }
+        icon.setAttribute("src", newIconPath);
+      }
+
+      function isLastMessageSent() {
+        let count = document.getElementsByClassName("message").length;
+        return count > 0 && document
+          .getElementsByClassName("message")
+          .item(count-1)
+          .className.includes("msg-right");
+      }
+
+      function isLastMessageReceived() {
+        return document
+          .getElementsByClassName("message")
+          .item(document.getElementsByClassName("message").length - 1)
+          .className.includes("msg-left");
+      }
+
+      function convertTo12HourFormat() {
+        const date = new Date();
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
+        const ampm = hours >= 12 ? "PM" : "AM";
+
+        // Convert hours to 12-hour format
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+
+        // Add leading zero to minutes if needed
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+
+        // Construct the time string
+        const timeString = `${hours}:${minutes} ${ampm}`;
+
+        return timeString;
+      }
+
       const generateMsg = (msg, type, otherUser) => {
         const conatainer = document.getElementById("messages");
+
         const content =
           type === "send"
-            ? `<li class="message sent">
+            ? isLastMessageSent() === true
+              ? `<li class="message msg-right">
                                         <p class="user">${user}</p>
                                         <p>${msg}</p>
-                                        <div class="timestamp">${new Date()
-                                          .toString()
-                                          .substring(16, 21)}</div>
+                                        <div class="timestamp">${convertTo12HourFormat()}</div>
                                     </li>`
-            : ` <li class="message received">
+              : `<li class="message msg-right sent">
+                                        <p class="user">${user}</p>
+                                        <p>${msg}</p>
+                                        <div class="timestamp">${convertTo12HourFormat()}</div>
+                                    </li>`
+            : isLastMessageReceived() === true
+            ? `<li class="message msg-left">
                                                   <p class="otheruser">${otherUser}</p>
                                                   <p>${msg}</p>
-                                                  <div class="timestamp">${new Date()
-                                                    .toString()
-                                                    .substring(16, 21)}</div>
+                                                  <div class="timestamp">${convertTo12HourFormat()}</div>
+                                              </li>`
+            : `<li class="message msg-left received">
+                                                  <p class="otheruser">${otherUser}</p>
+                                                  <p>${msg}</p>
+                                                  <div class="timestamp">${convertTo12HourFormat()}</div>
                                               </li>`;
         conatainer.innerHTML += content;
         document
@@ -316,6 +426,7 @@
             .then((data) => {
               if (data.success) {
                 roomNo = room.value;
+                document;
                 document.getElementById("dialog").close();
                 document.getElementById("mask").style.display = "none";
                 console.log(data.users);
@@ -323,6 +434,10 @@
                 for (let i = 0; i < data.users[roomNo].length; i++) {
                   document.getElementById(
                     "users"
+                  ).innerHTML += `<p class="bg-white my-2 rounded-2xl p-2"><span class="w-[10px] bg-green-500 h-[10px] inline-block rounded-full mr-2"></span>${data.users[roomNo][i]}</p>`;
+
+                  document.getElementById(
+                    "users-mobile"
                   ).innerHTML += `<p class="bg-white my-2 rounded-2xl p-2"><span class="w-[10px] bg-green-500 h-[10px] inline-block rounded-full mr-2"></span>${data.users[roomNo][i]}</p>`;
                 }
               } else {
